@@ -1,0 +1,8 @@
+version: "3.9"
+
+services:
+  api:
+    image: air-quality-api
+    container_name: air-quality-api
+    ports:
+      - "8000:8000"
