@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: air-quality-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: air-quality-api
+  template:
+    metadata:
+      labels:
+        app: air-quality-api
+    spec:
+      containers:
+        - name: api
+          image: air-quality-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
