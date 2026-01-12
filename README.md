@@ -5,6 +5,8 @@
 Ce projet met en œuvre un pipeline ETL (Extract – Transform – Load) permettant de collecter, transformer et stocker des données de qualité de l’air à partir d’une API publique.
 L’application est exposée sous forme d’API REST, conteneurisée avec Docker et déployée via Kubernetes afin de démontrer des notions d’orchestration et de résilience.
 
+La version actuelle est centrée sur Paris, avec une extension possible vers plusieurs localisations
+
 ## Source des données
 
 Les données proviennent de l’API publique Open-Meteo – Air Quality, qui fournit des mesures et prévisions horaires de polluants atmosphériques.

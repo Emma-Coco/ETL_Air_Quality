@@ -7,35 +7,45 @@
 </head>
 <body>
 
-    <h1>🌍 Air Quality Dashboard</h1>
+<h1>Air Quality Dashboard — Paris</h1>
 
-    <section>
-        <h2>Air Quality Today</h2>
+<section>
+    <h2>Air Quality Today</h2>
         <div id="today">
             Loading...
         </div>
-    </section>
+</section>
 
-    <section>
-        <h2>Last 5 Days</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>PM2.5</th>
-                    <th>PM10</th>
-                    <th>NO₂</th>
-                </tr>
-            </thead>
-            <tbody id="daily-table">
-            </tbody>
-        </table>
-    </section>
+<section>
+    <h2>Last 5 Days</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>PM2.5 (µg/m³)</th>
+                <th>PM10 (µg/m³)</th>
+                <th>NO₂ (µg/m³)</th>
+            </tr>
+        </thead>
+        <tbody id="daily-table"></tbody>
+    </table>
+</section>
 
-    <canvas id="chart" width="600" height="300"></canvas>
+<section>
+    <canvas id="chart" width="700" height="350"></canvas>
+</section>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="scripts.js"></script>
+<section>
+    <h3>How to read the data</h3>
+    <ul>
+        <li><strong>PM2.5</strong>: fine particles that penetrate deep into the lungs</li>
+        <li><strong>PM10</strong>: coarser particles affecting airways</li>
+        <li><strong>NO₂</strong>: traffic-related air pollutant</li>
+    </ul>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="scripts.js"></script>
 
 </body>
 </html>
