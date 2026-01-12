@@ -1,13 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 import requests
 import sqlite3
 from collections import defaultdict
+from datetime import date
 
 # --------------------------------------------------
 # CONFIG
 # --------------------------------------------------
 
 app = FastAPI(title="Air Quality ETL API")
+
 DB_PATH = "air_quality.db"
 OPEN_METEO_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 
@@ -37,7 +39,7 @@ init_db()
 
 
 # --------------------------------------------------
-# CORE ETL LOGIC (REUSABLE)
+# CORE ETL LOGIC
 # --------------------------------------------------
 
 def fetch_hourly_air_quality(latitude: float, longitude: float):
@@ -94,7 +96,7 @@ def health_check():
 
 
 # --------------------------------------------------
-# EXTRACT
+# ETL ENDPOINTS
 # --------------------------------------------------
 
 @app.get("/extract")
@@ -102,8 +104,7 @@ def extract_air_quality(
     latitude: float = 48.8566,
     longitude: float = 2.3522
 ):
-    hourly = fetch_hourly_air_quality(latitude, longitude)
-    return hourly
+    return fetch_hourly_air_quality(latitude, longitude)
 
 
 # --------------------------------------------------
@@ -117,18 +118,15 @@ def transform_air_quality(
 ):
     hourly = fetch_hourly_air_quality(latitude, longitude)
 
-    transformed = []
-
-    for i, timestamp in enumerate(hourly["time"]):
-        transformed.append({
+    return [
+        {
             "datetime": timestamp,
             "pm2_5": hourly["pm2_5"][i],
             "pm10": hourly["pm10"][i],
             "nitrogen_dioxide": hourly["nitrogen_dioxide"][i]
-        })
-
-    return transformed
-
+        }
+        for i, timestamp in enumerate(hourly["time"])
+    ]
 
 # --------------------------------------------------
 # AGGREGATE (DAILY)
@@ -180,19 +178,20 @@ def load_data(
 
 
 # --------------------------------------------------
-# READ FROM DATABASE
+# READ API (FOR FRONTEND / USERS) FROM DB
 # --------------------------------------------------
 
-@app.get("/air-quality")
-def get_air_quality():
+@app.get("/air-quality/daily")
+def get_air_quality_daily(limit: int = 5):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""
         SELECT date, pm2_5_avg, pm10_avg, nitrogen_dioxide_avg
         FROM air_quality_daily
-        ORDER BY date
-    """)
+        ORDER BY date DESC
+        LIMIT ?
+    """, (limit,))
 
     rows = cursor.fetchall()
     conn.close()
@@ -204,5 +203,34 @@ def get_air_quality():
             "pm10_avg": row[2],
             "nitrogen_dioxide_avg": row[3]
         }
-        for row in rows
+        for row in reversed(rows)
     ]
+
+@app.get("/air-quality/today")
+def get_today_air_quality():
+    today = date.today().isoformat()
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT date, pm2_5_avg, pm10_avg, nitrogen_dioxide_avg
+        FROM air_quality_daily
+        WHERE date = ?
+    """, (today,))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No air quality data available for today"
+        )
+
+    return {
+        "date": row[0],
+        "pm2_5_avg": row[1],
+        "pm10_avg": row[2],
+        "nitrogen_dioxide_avg": row[3]
+    }
