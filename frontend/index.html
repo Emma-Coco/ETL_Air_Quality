@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Air Quality Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1>🌍 Air Quality Dashboard</h1>
+
+    <section>
+        <h2>Air Quality Today</h2>
+        <div id="today">
+            Loading...
+        </div>
+    </section>
+
+    <section>
+        <h2>Last 5 Days</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>PM2.5</th>
+                    <th>PM10</th>
+                    <th>NO₂</th>
+                </tr>
+            </thead>
+            <tbody id="daily-table">
+            </tbody>
+        </table>
+    </section>
+
+    <canvas id="chart" width="600" height="300"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="scripts.js"></script>
+
+</body>
+</html>

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 import sqlite3
 from collections import defaultdict
@@ -9,6 +10,14 @@ from datetime import date
 # --------------------------------------------------
 
 app = FastAPI(title="Air Quality ETL API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # OK pour un TP
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 DB_PATH = "air_quality.db"
 OPEN_METEO_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
