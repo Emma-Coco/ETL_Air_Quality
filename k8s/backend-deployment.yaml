@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: air-quality-backend
+  namespace: air-quality
+  labels:
+    app: air-quality
+    component: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: air-quality
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: air-quality
+        component: backend
+    spec:
+      containers:
+      - name: api
+        image: air-quality-api:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        
+        # Environment variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: air-quality-config
+        
+        # Environment variables from Secret (si nécessaire)
+        env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: air-quality-secrets
+              key: API_KEY_PLACEHOLDER
+              optional: true
+        
+        # Volume mount pour la base de données
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        
+        # Liveness probe - vérifie que le conteneur est vivant
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Readiness probe - vérifie que le conteneur est prêt
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: air-quality-data
+      
+      # Restart policy
+      restartPolicy: Always

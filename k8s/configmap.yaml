@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: air-quality-config
+  namespace: air-quality
+  labels:
+    app: air-quality
+data:
+  # Database configuration
+  DB_PATH: "/data/air_quality.db"
+  
+  # API configuration
+  OPEN_METEO_URL: "https://air-quality-api.open-meteo.com/v1/air-quality"
+  
+  # Default location (Paris)
+  DEFAULT_LATITUDE: "48.8566"
+  DEFAULT_LONGITUDE: "2.3522"
+  
+  # Application settings
+  LOG_LEVEL: "info"
+  UVICORN_HOST: "0.0.0.0"
+  UVICORN_PORT: "8000"
+  
+  # CORS settings
+  CORS_ALLOW_ORIGINS: "*"
+  
+  # Data refresh interval (in seconds)
+  REFRESH_INTERVAL: "300"
