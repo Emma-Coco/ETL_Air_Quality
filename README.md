@@ -131,15 +131,37 @@ Cette propriété a été testée en supprimant manuellement un Pod.
 
 ## Lancement du projet
 
-Docker
+### Docker (Backend uniquement)
+
+```bash
+cd backend
 docker build -t air-quality-api .
 docker run -p 8000:8000 air-quality-api
+```
 
-Docker Compose
-docker-compose up --build
+### Docker Compose (Recommandé)
 
-Kubernetes
+Lancer l'application complète (frontend + backend) :
+
+```bash
+docker compose up --build
+```
+
+L'application sera accessible à :
+- **Frontend** : http://localhost (Dashboard interactif)
+- **API Backend** : http://localhost:8000/docs (Documentation Swagger)
+- **Health Check** : http://localhost:8000/health
+
+Pour charger les données initiales :
+```bash
+curl -X POST http://localhost:8000/load
+```
+
+### Kubernetes
+
+```bash
 kubectl apply -f deploy/
+```
 
 
 Accès à l’API :
