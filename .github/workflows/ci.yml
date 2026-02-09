@@ -1,0 +1,116 @@
+# ============================================
+# CI/CD Pipeline - Projet Universitaire
+# ============================================
+# Ce workflow vérifie automatiquement que les
+# images Docker se construisent correctement
+# à chaque push sur la branche master.
+# ============================================
+
+name: CI - Docker Build
+
+# Déclenchement : à chaque push sur master
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # Job 1 : Build de l'image backend
+  build-backend:
+    name: Build Backend Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Étape 1 : Récupérer le code source
+      - name: Checkout du code
+        uses: actions/checkout@v4
+      
+      # Étape 2 : Build de l'image Docker backend
+      - name: Build de l'image Backend (FastAPI)
+        run: |
+          cd backend
+          docker build -t air-quality-api:latest .
+          echo "✅ Image backend construite avec succès"
+      
+      # Étape 3 : Vérifier que l'image existe
+      - name: Vérification de l'image
+        run: |
+          docker images | grep air-quality-api
+          echo "✅ Image backend disponible localement"
+
+  # Job 2 : Build de l'image frontend
+  build-frontend:
+    name: Build Frontend Docker Image
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Étape 1 : Récupérer le code source
+      - name: Checkout du code
+        uses: actions/checkout@v4
+      
+      # Étape 2 : Build de l'image Docker frontend
+      - name: Build de l'image Frontend (Nginx)
+        run: |
+          cd frontend
+          docker build -t air-quality-frontend:latest .
+          echo "✅ Image frontend construite avec succès"
+      
+      # Étape 3 : Vérifier que l'image existe
+      - name: Vérification de l'image
+        run: |
+          docker images | grep air-quality-frontend
+          echo "✅ Image frontend disponible localement"
+
+  # Job 3 : Test de l'orchestration complète
+  test-docker-compose:
+    name: Test Docker Compose
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    
+    steps:
+      # Étape 1 : Récupérer le code source
+      - name: Checkout du code
+        uses: actions/checkout@v4
+      
+      # Étape 2 : Build avec Docker Compose
+      - name: Build avec Docker Compose
+        run: |
+          docker compose build
+          echo "✅ Build Docker Compose réussi"
+      
+      # Étape 3 : Vérification de la configuration
+      - name: Validation docker-compose.yml
+        run: |
+          docker compose config
+          echo "✅ Configuration Docker Compose valide"
+      
+      # Étape 4 : Test de démarrage des services
+      - name: Test de démarrage des conteneurs
+        run: |
+          docker compose up -d
+          sleep 10
+          docker compose ps
+          echo "✅ Conteneurs démarrés avec succès"
+      
+      # Étape 5 : Test du health check backend
+      - name: Test de l'API Backend
+        run: |
+          curl --fail http://localhost:8000/health || exit 1
+          echo "✅ API Backend accessible et fonctionnelle"
+      
+      # Étape 6 : Nettoyage
+      - name: Arrêt des conteneurs
+        if: always()
+        run: |
+          docker compose down -v
+          echo "✅ Nettoyage effectué"
+
+# ============================================
+# RÉSULTAT ATTENDU
+# ============================================
+# ✅ Toutes les images Docker se construisent
+# ✅ Docker Compose fonctionne correctement
+# ✅ L'API backend répond aux requêtes
+# ✅ Pipeline verte = Projet validé
+# ============================================
