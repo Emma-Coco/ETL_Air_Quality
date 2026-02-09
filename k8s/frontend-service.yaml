@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: air-quality-frontend
+  namespace: air-quality
+  labels:
+    app: air-quality
+    component: frontend
+spec:
+  type: NodePort
+  selector:
+    app: air-quality
+    component: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    nodePort: 30080
+    protocol: TCP
+  sessionAffinity: None

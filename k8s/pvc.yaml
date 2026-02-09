@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: air-quality-data
+  namespace: air-quality
+  labels:
+    app: air-quality
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  # Note: Pour Docker Desktop, la storageClassName par défaut fonctionne
+  # Pour d'autres environnements, spécifiez la classe appropriée :
+  # storageClassName: standard  # GKE
+  # storageClassName: gp2        # AWS EKS
+  # storageClassName: managed    # Azure AKS
