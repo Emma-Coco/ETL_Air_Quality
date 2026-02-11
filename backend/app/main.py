@@ -4,6 +4,7 @@ import requests
 import sqlite3
 from collections import defaultdict
 from datetime import date
+import os
 
 # --------------------------------------------------
 # CONFIG
@@ -19,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_PATH = "air_quality.db"
+DB_PATH = os.getenv("DB_PATH", "air_quality.db")
 OPEN_METEO_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 
 

@@ -10,7 +10,7 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 2Gi
   # Note: Pour Docker Desktop, la storageClassName par défaut fonctionne
   # Pour d'autres environnements, spécifiez la classe appropriée :
   # storageClassName: standard  # GKE
