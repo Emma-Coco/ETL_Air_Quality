@@ -162,7 +162,9 @@ if [ -n "$BACKEND_POD" ]; then
     else
         echo -e "${YELLOW}⚠️  Impossible de charger les données automatiquement${NC}"
         echo -e "${YELLOW}   Chargez-les manuellement :${NC}"
-        echo -e "   kubectl exec -n air-quality $BACKEND_POD -- curl -X POST http://localhost:8000/load"
+        echo -e "   kubectl exec -n air-quality $BACKEND_POD -- curl -X POST http://localhost:8000/load ou kubectl run curl-debug -n air-quality --rm -it \
+  --image=curlimages/curl --restart=Never \
+  -- curl -X POST http://air-quality-backend:8000/load "
     fi
 else
     echo -e "${YELLOW}⚠️  Aucun pod backend prêt${NC}"
