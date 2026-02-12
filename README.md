@@ -1,185 +1,194 @@
-# Air Quality ETL — Docker & Kubernetes
+# Air Quality ETL --- Dashboard Paris
 
-### Description du projet
+Ce projet implémente un pipeline ETL (Extract, Transform, Load) complet,
+de la collecte de données environnementales jusqu'à leur visualisation
+dans une interface moderne.
 
-Ce projet met en œuvre un pipeline ETL (Extract – Transform – Load) permettant de collecter, transformer et stocker des données de qualité de l’air à partir d’une API publique.
-L’application est exposée sous forme d’API REST, conteneurisée avec Docker et déployée via Kubernetes afin de démontrer des notions d’orchestration et de résilience.
+L'architecture repose sur des microservices conteneurisés et orchestrés
+afin de garantir résilience, scalabilité et maintenabilité.
 
-La version actuelle est centrée sur Paris, avec une extension possible vers plusieurs localisations
+------------------------------------------------------------------------
 
-## Source des données
+## Quickstart (Démarrage Rapide)
 
-Les données proviennent de l’API publique Open-Meteo – Air Quality, qui fournit des mesures et prévisions horaires de polluants atmosphériques.
+Pour lancer l'application complète (Frontend + Backend + Base de
+données) en une seule commande :
 
-Polluants utilisés :
+``` bash
+# 1. Rendre les scripts exécutables
+chmod +x scripts/*.sh
 
-PM2.5
-
-PM10
-
-Dioxyde d’azote (NO₂)
-
-Les données sont récupérées sous forme horaire, puis agrégées quotidiennement.
-
-## Pipeline ETL
-
-### Extract
-
-L’extraction consiste à appeler l’API Open-Meteo afin de récupérer les données horaires de pollution pour une localisation donnée (latitude / longitude).
-
-Endpoint :
-
-GET /extract
-
-### Transform
-
-Les données horaires sont regroupées par date afin de calculer :
-
-la moyenne journalière de PM2.5
-
-la moyenne journalière de PM10
-
-la moyenne journalière de NO₂
-
-Cette étape permet de réduire le volume de données et de produire une information plus exploitable.
-
-Endpoint :
-
-GET /aggregate-daily
-
-### Load
-
-Les données agrégées sont stockées dans une base SQLite sous forme de moyennes journalières.
-Chaque appel au chargement enrichit progressivement l’historique en base, selon la fenêtre temporelle fournie par l’API.
-
-Endpoint :
-
-POST /load
-
-
-### Structure de la table :
-
-date (clé primaire)
-
-pm2_5_avg
-
-pm10_avg
-
-nitrogen_dioxide_avg
-
-## Base de données
-
-Le projet utilise SQLite, choix volontairement simple et adapté au cadre d’un TP.
-La base contient uniquement les données agrégées journalières, et non les données horaires brutes.
-
-## Architecture technique
-
-API Open-Meteo
-      ↓
-FastAPI (ETL)
-      ↓
-SQLite
-
-
-L’API FastAPI expose les différents endpoints ETL et sert de point d’entrée unique pour le traitement des données.
-
-## Docker
-
-L’application est conteneurisée avec Docker afin de garantir :
-
-la reproductibilité de l’environnement
-
-l’isolation des dépendances
-
-la portabilité de l’application
-
-Docker permet de construire une image contenant l’application et son environnement d’exécution.
-
-## Kubernetes
-
-L’application est déployée sur un cluster Kubernetes local via Docker Desktop.
-
-Deployment
-
-Le Deployment définit l’état souhaité de l’application :
-
-image Docker à utiliser
-
-nombre de Pods (instances)
-
-redémarrage automatique en cas de panne
-
-Pod
-
-Un Pod correspond à une instance de l’application FastAPI en cours d’exécution.
-
-Service
-
-Le Service fournit un point d’accès réseau stable vers l’application, indépendamment des Pods sous-jacents, et permet la répartition du trafic.
-
-## Résilience
-
-La résilience est assurée par Kubernetes :
-
-si un Pod est supprimé ou tombe en panne
-
-Kubernetes recrée automatiquement une nouvelle instance
-
-le Service continue de rediriger les requêtes
-
-Cette propriété a été testée en supprimant manuellement un Pod.
-
-## Lancement du projet
-
-### Docker (Backend uniquement)
-
-```bash
-cd backend
-docker build -t air-quality-api .
-docker run -p 8000:8000 air-quality-api
+# 2. Lancer le script d'automatisation
+./scripts/start.sh
 ```
 
-### Docker Compose (Recommandé)
+Une fois démarrée, l'application est accessible aux adresses suivantes :
 
-Lancer l'application complète (frontend + backend) :
+-   Dashboard interactif : http://localhost
+-   Documentation API (Swagger) : http://localhost:8000/docs
+-   Santé du système : http://localhost:8000/health
 
-```bash
-docker compose up --build
+------------------------------------------------------------------------
+
+## Architecture & Technologies
+
+Le projet est découpé en services spécialisés communiquant via une API
+REST.
+
+### Backend --- FastAPI
+
+-   Gestion du pipeline ETL
+-   Calcul des moyennes journalières
+-   Exposition des endpoints REST
+-   Accès aux données SQLite
+
+### Frontend --- Nginx Alpine
+
+-   Interface HTML / CSS / JavaScript
+-   Visualisation des données
+-   Interaction avec l'API backend
+
+### Base de données --- SQLite
+
+-   Stockage persistant des moyennes journalières
+-   Isolation dans un volume Docker
+-   Protection contre la perte de données
+
+### Infrastructure
+
+-   Docker Compose pour l'environnement de développement
+-   Kubernetes pour l'environnement cible de production
+
+------------------------------------------------------------------------
+
+## Le Pipeline ETL (Objectifs Pédagogiques)
+
+Le cœur de l'application respecte les trois étapes ETL définies dans les
+consignes du projet.
+
+### 1. Extract (Extraction)
+
+Le backend interroge l'API publique Open-Meteo afin de récupérer les
+mesures horaires brutes :
+
+-   PM2.5
+-   PM10
+-   NO₂
+
+### 2. Transform (Transformation)
+
+Les données horaires sont :
+
+-   Nettoyées
+-   Vérifiées
+-   Agrégées en moyennes quotidiennes
+-   Réduites aux informations pertinentes
+
+Le traitement est réalisé en Python.
+
+### 3. Load (Chargement)
+
+Les données transformées sont insérées dans la base SQLite.
+
+L'utilisation de la commande SQL suivante :
+
+``` sql
+INSERT OR REPLACE
 ```
 
----
-pour relancer : 
-```bash
-docker compose down
-``` 
-et 
-```bash
-docker compose up --build
-```
----
+garantit :
 
-L'application sera accessible à :
-- **Frontend** : http://localhost (Dashboard interactif)
-- **API Backend** : http://localhost:8000/docs (Documentation Swagger)
-- **Health Check** : http://localhost:8000/health
+-   Absence de doublons
+-   Mise à jour automatique des données existantes
+-   Intégrité du stockage
 
-Pour charger les données initiales :
-```bash
-curl -X POST http://localhost:8000/load
-```
+### Interaction
 
-### Kubernetes
+Conformément aux exigences du TP, le frontend intègre un bouton
+"Actualiser les données" permettant de déclencher manuellement le cycle
+ETL complet.
 
-```bash
-kubectl apply -f deploy/
-```
+------------------------------------------------------------------------
 
+## Déploiement & Résilience (Kubernetes)
 
-Accès à l’API :
+Pour l'environnement de production, le projet utilise les objets
+Kubernetes suivants :
 
-http://localhost:30080/health
+### Namespace
 
-## Conclusion
+Isolation des ressources dans l'espace :
 
-Ce projet illustre la mise en place complète d’un pipeline ETL simple mais réaliste, déployé dans un environnement conteneurisé et orchestré.
-Il met en évidence les apports de Docker pour la portabilité et de Kubernetes pour la gestion du cycle de vie et la résilience de l’application.
+    air-quality
+
+### PersistentVolumeClaim (PVC)
+
+-   Conservation des données SQLite
+-   Résistance aux redémarrages des Pods
+
+### Liveness & Readiness Probes
+
+-   Surveillance automatique de l'état de l'API
+-   Redémarrage automatique en cas d'échec
+-   Garantie de disponibilité
+
+------------------------------------------------------------------------
+
+## Documentation Détaillée
+
+Des guides techniques sont disponibles dans le dossier :
+
+    ./docs/
+
+### Guide Docker
+
+-   Dockerfiles
+-   Réseaux
+-   Gestion des volumes
+-   Build et exécution
+
+### Guide Kubernetes
+
+-   Déploiement sur cluster
+-   Tests de résilience
+-   Scaling
+
+### Historique des Phases
+
+-   Évolution du projet
+-   Choix d'architecture
+-   Arbitrages techniques
+
+------------------------------------------------------------------------
+
+## Maintenance & Utilitaires
+
+Des scripts sont fournis dans le dossier :
+
+    ./scripts/
+
+  Script                     Description
+  -------------------------- -----------------------------------------
+  ./scripts/start.sh         Lancement complet des services
+  ./scripts/stop.sh          Arrêt propre des conteneurs
+  ./scripts/verify.sh        Test de connectivité Frontend ↔ Backend
+  ./scripts/cleanup-k8s.sh   Suppression des ressources Kubernetes
+
+------------------------------------------------------------------------
+
+## Stack Technique
+
+-   Python
+-   FastAPI
+-   Docker
+-   Docker Compose
+-   Kubernetes
+-   Nginx
+-   SQLite
+
+------------------------------------------------------------------------
+
+## Auteur
+
+Projet de fin de module\
+Février 2026
