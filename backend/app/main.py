@@ -95,6 +95,41 @@ def compute_daily_aggregates(hourly_data):
 
     return aggregated
 
+def run_etl(latitude: float = 48.8566, longitude: float = 2.3522):
+    print("Starting automatic ETL process...")
+
+    try:
+        hourly = fetch_hourly_air_quality(latitude, longitude)
+        aggregated_data = compute_daily_aggregates(hourly)
+
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+
+        for row in aggregated_data:
+            cursor.execute("""
+                INSERT OR REPLACE INTO air_quality_daily
+                (date, pm2_5_avg, pm10_avg, nitrogen_dioxide_avg)
+                VALUES (?, ?, ?, ?)
+            """, (
+                row["date"],
+                row["pm2_5_avg"],
+                row["pm10_avg"],
+                row["nitrogen_dioxide_avg"]
+            ))
+
+        conn.commit()
+        conn.close()
+
+        print(f"ETL completed successfully ({len(aggregated_data)} rows)")
+
+    except Exception as e:
+        print(f"ETL failed: {e}")
+
+
+@app.on_event("startup")
+def startup_event():
+    print("Application starting...")
+    run_etl()
 
 # --------------------------------------------------
 # HEALTH CHECK

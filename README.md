@@ -147,6 +147,17 @@ Lancer l'application complète (frontend + backend) :
 docker compose up --build
 ```
 
+---
+pour relancer : 
+```bash
+docker compose down
+``` 
+et 
+```bash
+docker compose up --build
+```
+---
+
 L'application sera accessible à :
 - **Frontend** : http://localhost (Dashboard interactif)
 - **API Backend** : http://localhost:8000/docs (Documentation Swagger)
