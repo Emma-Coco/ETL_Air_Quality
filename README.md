@@ -22,11 +22,32 @@ chmod +x scripts/*.sh
 ./scripts/start.sh
 ```
 
+### ATTENTION
+
+Le projet propose deux orchestrations distinctes selon l'objectif :
+
+Développement (Docker Compose) : Idéal pour coder. Les modifications sont rapides.
+
+Commande : ./scripts/start.sh
+
+Production (Kubernetes) : Pour tester la haute disponibilité et la persistance réelle.
+
+Commande : ./scripts/deploy-k8s.sh
+
 Une fois démarrée, l'application est accessible aux adresses suivantes :
 
 -   Dashboard interactif : http://localhost
 -   Documentation API (Swagger) : http://localhost:8000/docs
 -   Santé du système : http://localhost:8000/health
+
+
+## Table des scripts
+
+./scripts/start.sh	Lancement rapide (Docker Compose)
+./scripts/deploy-k8s.sh	Déploiement complet sur Kubernetes
+./scripts/verify.sh	Vérifie que tous les objets K8s sont créés et prêts
+./scripts/diagnose.sh	Analyse les logs et les événements en cas d'erreur de Pod
+./scripts/cleanup-k8s.sh	Supprime proprement le Namespace et les volumes
 
 ------------------------------------------------------------------------
 
@@ -131,6 +152,20 @@ Isolation des ressources dans l'espace :
 -   Surveillance automatique de l'état de l'API
 -   Redémarrage automatique en cas d'échec
 -   Garantie de disponibilité
+
+
+## Tests de résilience
+
+Tests de Résilience (Kubernetes)
+Une fois déployé sur Kubernetes via ./scripts/deploy-k8s.sh, vous pouvez tester l'auto-réparation du système :
+
+Identifier le Pod Backend : kubectl get pods -n air-quality
+
+Simuler une panne (Suppression) : kubectl delete pod <NOM_DU_POD_BACKEND> -n air-quality
+
+Observer le Self-Healing : Le contrôleur Kubernetes détecte immédiatement l'absence du Pod et en recrée un nouveau pour maintenir l'état désiré (replicas: 1).
+
+Vérifier la Persistance : Grâce au PersistentVolumeClaim, la base de données SQLite est conservée. Le nouveau Pod se reconnecte automatiquement au fichier /data/air_quality.db sans perte de données.
 
 ------------------------------------------------------------------------
 

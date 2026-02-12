@@ -15,17 +15,24 @@ echo -e "${BLUE}📊 État des pods :${NC}"
 kubectl get pods -n air-quality
 
 echo -e "\n${BLUE}🔍 Détails des pods en erreur :${NC}"
-for pod in $(kubectl get pods -n air-quality --no-headers | grep -v "Running\|Completed" | awk '{print $1}'); do
-    echo -e "\n${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${YELLOW}Pod: $pod${NC}"
-    echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    
-    echo -e "\n${BLUE}Description :${NC}"
-    kubectl describe pod $pod -n air-quality | tail -30
-    
-    echo -e "\n${BLUE}Logs :${NC}"
-    kubectl logs $pod -n air-quality --tail=50 2>&1 || echo "Pas de logs disponibles"
-done
+# On cherche les pods qui ne sont pas en Running ou Completed
+ERROR_PODS=$(kubectl get pods -n air-quality --no-headers | grep -v "Running\|Completed" | awk '{print $1}')
+
+if [ -z "$ERROR_PODS" ]; then
+    echo -e "${GREEN}Aucun pod en erreur détecté.${NC}"
+else
+    for pod in $ERROR_PODS; do
+        echo -e "\n${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${YELLOW}Pod en difficulté: $pod${NC}"
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        
+        echo -e "\n${BLUE}Derniers événements :${NC}"
+        kubectl describe pod $pod -n air-quality | grep -A 10 "Events:"
+        
+        echo -e "\n${BLUE}Derniers logs (si disponibles) :${NC}"
+        kubectl logs $pod -n air-quality --tail=20 2>&1 || echo "Pas de logs disponibles."
+    done
+fi
 
 echo -e "\n${BLUE}📋 État des déploiements :${NC}"
 kubectl get deployments -n air-quality
@@ -36,22 +43,13 @@ kubectl get svc -n air-quality
 echo -e "\n${BLUE}💾 État des volumes :${NC}"
 kubectl get pvc -n air-quality
 
-echo -e "\n${BLUE}⚙️  ConfigMap :${NC}"
-kubectl get configmap -n air-quality
-
-echo -e "\n${BLUE}🔐 Secrets :${NC}"
-kubectl get secret -n air-quality
-
 echo -e "\n${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}💡 Commandes utiles :${NC}"
+echo -e "${GREEN}💡 Commandes de secours :${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-echo "Voir les logs d'un pod backend :"
+echo "Voir les logs du backend :"
 echo "  kubectl logs -n air-quality deployment/air-quality-backend"
 echo ""
-echo "Voir les événements :"
-echo "  kubectl get events -n air-quality --sort-by='.lastTimestamp'"
-echo ""
-echo "Redémarrer un déploiement :"
-echo "  kubectl rollout restart deployment air-quality-backend -n air-quality"
+echo "Redémarrer les services :"
+echo "  kubectl rollout restart deployment -n air-quality"
 echo ""

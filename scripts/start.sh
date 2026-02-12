@@ -2,6 +2,10 @@
 
 set -e
 
+# Déterminer le répertoire racine du projet (un niveau au-dessus de /scripts)
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
+
 echo "🚀 Démarrage de l'application Air Quality ETL..."
 echo ""
 
@@ -84,5 +88,5 @@ echo "   • Voir les logs      : docker compose logs -f"
 echo "   • Arrêter           : docker compose down"
 echo "   • Redémarrer        : docker compose restart"
 echo ""
-echo "📚 Documentation complète : voir DOCKER_GUIDE.md"
+echo "📚 Documentation complète : voir docs/DOCKER_GUIDE.md"
 echo ""
