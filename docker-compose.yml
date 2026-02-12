@@ -7,7 +7,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - air-quality-data:/app
+      - air-quality-data:/data
     networks:
       - air-quality-network
     healthcheck:

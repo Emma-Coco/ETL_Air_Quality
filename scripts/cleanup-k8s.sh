@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Déterminer le répertoire racine du projet
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 echo "🧹 Nettoyage des ressources Kubernetes Air Quality ETL..."
 echo ""
 
@@ -42,5 +45,5 @@ echo -e "${GREEN}🎉 Nettoyage terminé !${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo -e "${YELLOW}💡 Pour redéployer l'application :${NC}"
-echo -e "   ./deploy-k8s.sh"
+echo -e "   ./scripts/deploy-k8s.sh"
 echo ""

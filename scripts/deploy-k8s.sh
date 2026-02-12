@@ -15,8 +15,11 @@ NC='\033[0m'
 # Déterminer le répertoire racine du projet
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Vérifier si on est dans le dossier k8s ou à la racine
-if [[ "$SCRIPT_DIR" == */k8s ]]; then
+# Correction de la logique de détection des répertoires
+if [[ "$SCRIPT_DIR" == */scripts ]]; then
+    PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+    K8S_DIR="$PROJECT_ROOT/k8s"
+elif [[ "$SCRIPT_DIR" == */k8s ]]; then
     PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
     K8S_DIR="$SCRIPT_DIR"
 else

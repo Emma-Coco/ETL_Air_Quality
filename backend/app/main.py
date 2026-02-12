@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-DB_PATH = os.getenv("DB_PATH", "air_quality.db")
+DB_PATH = os.getenv("DB_PATH", "/data/air_quality.db")
 OPEN_METEO_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 
 
@@ -75,23 +75,28 @@ def compute_daily_aggregates(hourly_data):
 
     for i, timestamp in enumerate(hourly_data["time"]):
         date = timestamp.split("T")[0]
-        daily_values[date]["pm2_5"].append(hourly_data["pm2_5"][i])
-        daily_values[date]["pm10"].append(hourly_data["pm10"][i])
-        daily_values[date]["nitrogen_dioxide"].append(
-            hourly_data["nitrogen_dioxide"][i]
-        )
+        
+        # On ajoute les données seulement si elles ne sont pas None
+        if hourly_data["pm2_5"][i] is not None:
+            daily_values[date]["pm2_5"].append(hourly_data["pm2_5"][i])
+        if hourly_data["pm10"][i] is not None:
+            daily_values[date]["pm10"].append(hourly_data["pm10"][i])
+        if hourly_data["nitrogen_dioxide"][i] is not None:
+            daily_values[date]["nitrogen_dioxide"].append(hourly_data["nitrogen_dioxide"][i])
 
     aggregated = []
 
     for date, values in daily_values.items():
-        aggregated.append({
-            "date": date,
-            "pm2_5_avg": round(sum(values["pm2_5"]) / len(values["pm2_5"]), 2),
-            "pm10_avg": round(sum(values["pm10"]) / len(values["pm10"]), 2),
-            "nitrogen_dioxide_avg": round(
-                sum(values["nitrogen_dioxide"]) / len(values["nitrogen_dioxide"]), 2
-            )
-        })
+        # On ne calcule la moyenne que si on a au moins une valeur pour ce jour
+        if len(values["pm2_5"]) > 0:
+            aggregated.append({
+                "date": date,
+                "pm2_5_avg": round(sum(values["pm2_5"]) / len(values["pm2_5"]), 2),
+                "pm10_avg": round(sum(values["pm10"]) / len(values["pm10"]), 2),
+                "nitrogen_dioxide_avg": round(
+                    sum(values["nitrogen_dioxide"]) / len(values["nitrogen_dioxide"]), 2
+                )
+            })
 
     return aggregated
 
