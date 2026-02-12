@@ -1,51 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Air Quality Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality Dashboard — Paris</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<h1>Air Quality Dashboard — Paris</h1>
+<div class="app-container">
+    <header>
+        <h1>Qualité de l'Air <span class="city-tag">Paris</span></h1>
+        <p class="subtitle">Analyse des polluants atmosphériques en temps réel</p>
+    </header>
 
-<section>
-    <h2>Air Quality Today</h2>
-        <div id="today">
-            Loading...
+    <div class="dashboard-grid">
+        <section class="glass-card main-focus">
+            <div id="today" class="today-content">
+                <div class="skeleton">Calcul des indices de santé...</div>
+            </div>
+        </section>
+
+        <section class="glass-card chart-area">
+            <h3>Évolution temporelle</h3>
+            <div class="chart-container">
+                <canvas id="chart"></canvas>
+            </div>
+        </section>
+
+        <section class="glass-card table-area">
+            <h3>Historique (Moyennes journalières)</h3>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>PM2.5</th>
+                            <th>PM10</th>
+                            <th>NO₂</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-table"></tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <section class="legend-grid">
+        <div class="legend-card">
+            <span class="dot pm25"></span>
+            <div class="legend-text">
+                <strong>PM2.5</strong>
+                <p>Particules fines pénétrant profondément dans les poumons[cite: 20].</p>
+            </div>
         </div>
-</section>
-
-<section>
-    <h2>Last 5 Days</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>PM2.5 (µg/m³)</th>
-                <th>PM10 (µg/m³)</th>
-                <th>NO₂ (µg/m³)</th>
-            </tr>
-        </thead>
-        <tbody id="daily-table"></tbody>
-    </table>
-</section>
-
-<section>
-    <canvas id="chart" width="700" height="350"></canvas>
-</section>
-
-<section>
-    <h3>How to read the data</h3>
-    <ul>
-        <li><strong>PM2.5</strong>: fine particles that penetrate deep into the lungs</li>
-        <li><strong>PM10</strong>: coarser particles affecting airways</li>
-        <li><strong>NO₂</strong>: traffic-related air pollutant</li>
-    </ul>
-</section>
+        <div class="legend-card">
+            <span class="dot pm10"></span>
+            <div class="legend-text">
+                <strong>PM10</strong>
+                <p>Particules grossières affectant les voies respiratoires[cite: 20].</p>
+            </div>
+        </div>
+        <div class="legend-card">
+            <span class="dot no2"></span>
+            <div class="legend-text">
+                <strong>NO₂</strong>
+                <p>Polluant principalement lié au trafic routier[cite: 20].</p>
+            </div>
+        </div>
+    </section>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="scripts.js"></script>
-
 </body>
 </html>
